@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Live Mirror Typing</title>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+
+<h2>^_^</h2>
+
+<input id="typingBox" type="text" placeholder="Type here..." style="width:300px; height:30px; font-size:16px;">
+
+<script>
+  const socket = io();
+  const typingBox = document.getElementById("typingBox");
+
+  // Send text LIVE
+  typingBox.addEventListener("input", () => {
+    socket.emit("live_text", { text: typingBox.value });
+  });
+
+  // Receive live text update
+  socket.on("live_text_update", (data) => {
+    typingBox.value = data.text;
+  });
+</script>
+
+</body>
+</html>
