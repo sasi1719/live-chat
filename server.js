@@ -1,19 +1,23 @@
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
-
-const app = express();
-app.use(express.static("public")); // <-- MUST be correct
-
-const server = http.createServer(app);
-const io = new Server(server);
-
-io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
-
-  socket.on("live_text", (data) => {
-    socket.broadcast.emit("live_text_update", data);
-  });
+const io = require("socket.io")(3000, {
+  cors: { origin: "*" }
 });
 
-server.listen(3000, () => console.log("Server running on port 3000"));
+let typingTimeout;
+
+io.on("connection", (socket) => {
+  
+  socket.on("live_text", (data) => {
+
+    // Send typing update to other users
+    socket.broadcast.emit("live_text_update", data);
+
+    // Clear old timeout if user types again
+    clearTimeout(typingTimeout);
+
+    // After 1.5 seconds of no typing → unlock all other clients
+    typingTimeout = setTimeout(() => {
+      socket.broadcast.emit("unlock_textbox");
+    }, 1500);
+  });
+
+});

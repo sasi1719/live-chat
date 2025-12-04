@@ -8,20 +8,27 @@
 
 <h2>^_^</h2>
 
-<input id="typingBox" type="text" placeholder="Type here..." style="width:300px; height:30px; font-size:16px;">
+<input id="typingBox" type="text" placeholder="Type here..."
+       style="width:300px; height:30px; font-size:16px;">
 
 <script>
   const socket = io();
   const typingBox = document.getElementById("typingBox");
 
-  // Send text LIVE
+  // When YOU type → send event
   typingBox.addEventListener("input", () => {
     socket.emit("live_text", { text: typingBox.value });
   });
 
-  // Receive live text update
+  // When OTHER user is typing
   socket.on("live_text_update", (data) => {
+    typingBox.readOnly = true;       // 🔒 lock
     typingBox.value = data.text;
+  });
+
+  // When OTHER user stops typing for 1.5 seconds
+  socket.on("unlock_textbox", () => {
+    typingBox.readOnly = false;      // 🔓 unlock
   });
 </script>
 
